@@ -1,4 +1,5 @@
 import React from 'react';
+import ReturnsOnSavings from './ReturnsOnSavings';
 
 class IncomeTaxDeclaraton extends React.Component {
 
@@ -9,7 +10,11 @@ class IncomeTaxDeclaraton extends React.Component {
             taxableIncome: 0,
             deductions: 0,
             defaultDeductions: 250000,
-            taxToPay:0
+            taxToPay: 0,
+            taxOnSlab1: 0,
+            taxOnSlab2: 0,
+            taxOnSlab3: 0,
+
         }
 
     }
@@ -17,14 +22,14 @@ class IncomeTaxDeclaraton extends React.Component {
     grossIncomeChangeHandler = (event) => {
         this.setState({
             grossIncome: event.target.value,
-            taxableIncome: event.target.value-this.state.defaultDeductions,
+            taxableIncome: event.target.value - this.state.defaultDeductions,
         })
     }
 
     deductionsChangeHandler = (event) => {
         this.setState({
             deductions: event.target.value,
-            taxableIncome:this.state.grossIncome-event.target.value-this.state.defaultDeductions
+            taxableIncome: this.state.grossIncome - event.target.value - this.state.defaultDeductions
         })
     }
 
@@ -32,25 +37,36 @@ class IncomeTaxDeclaraton extends React.Component {
         let fivePercentSlab = 250000;
         let secondSlab = 1000000;
 
-        if(this.state.taxableIncome>=fivePercentSlab){
-            var tax = (fivePercentSlab*5)/100;
-            let leftAmount = this.state.taxableIncome-fivePercentSlab;
+        if (this.state.taxableIncome >= fivePercentSlab) {
+            var tax = (fivePercentSlab * 5) / 100;
+            this.state.taxOnSlab1 = tax;
+            let leftAmount = this.state.taxableIncome - fivePercentSlab;
 
-            if(leftAmount>0 &&leftAmount<secondSlab){
-                tax = tax + (leftAmount*20)/100;
+            if (leftAmount > 0 && leftAmount < secondSlab) {
+                let taxSlab2 = (leftAmount * 20) / 100;
+                tax = tax + taxSlab2;
+                this.state.taxOnSlab2 = taxSlab2;
+                //leftAmount = leftAmount - secondSlab;
+
             }
-            else if(leftAmount>0 &&leftAmount>secondSlab){
-                tax = tax+ (secondSlab*20)/100;
+
+            if (leftAmount > 0 && leftAmount > secondSlab){
+                let taxSlab2 = (secondSlab * 20) / 100;
+                tax = tax + taxSlab2;
+                this.state.taxOnSlab2 = taxSlab2;
                 leftAmount = leftAmount - secondSlab;
-
-                if(leftAmount>0){
-                    tax = tax+ (leftAmount*30)/100;
-                }
             }
+            
+            if (leftAmount > 0) {
+                let taxSlab3 = (leftAmount * 30) / 100;
+                tax = tax + taxSlab3;
+                this.state.taxOnSlab3 = taxSlab3;
+            }
+
         }
 
         this.setState({
-            taxToPay : tax,
+            taxToPay: tax,
         })
     }
 
@@ -69,8 +85,15 @@ class IncomeTaxDeclaraton extends React.Component {
                 <div>
                     <span>Taxable Income:</span><span> {this.state.taxableIncome}</span>
                 </div>
+                <ReturnsOnSavings></ReturnsOnSavings>
                 <div>
                     <button onClick={this.calculateTax}> Calculate Tax</button>  Tax to Pay: {this.state.taxToPay}
+                </div>
+                <div>
+                    Details: 
+                    <div><span>5%</span><span> {this.state.taxOnSlab1}</span></div>
+                    <div><span>20%</span><span> {this.state.taxOnSlab2}</span></div>
+                    <div><span>30%</span><span> {this.state.taxOnSlab3}</span></div>
                 </div>
             </div>
         )
